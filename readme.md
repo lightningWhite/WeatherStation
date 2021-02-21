@@ -119,10 +119,11 @@ as root and the Pi must be restarted for the changes to take effect:
 
 ``` bash
 sudo ./install.sh
+# The Pi must be rebooted before being able to set the hardware clock time.
+sudo reboot
 # Ensure the Pi reports the correct time with the 'date' command, and then
 # write the time to the RTC module with this command
 sudo hwclock -w
-sudo reboot
 ```
 
 ## Running the Weather Station
