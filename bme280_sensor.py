@@ -17,7 +17,7 @@ from time import sleep
 
 # Amount to add to the barometer reading for Logan, Utah
 # NOTE: This will need to be calibrated for each individual sensor
-CALIBRATION = 157.3826
+CALIBRATION = 159.1826
 
 # True will report temperature in F, False will report in C
 DO_FAHRENHEIT = True

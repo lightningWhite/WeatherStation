@@ -126,6 +126,17 @@ sudo reboot
 sudo hwclock -w
 ```
 
+The barometric pressure sensor should be calibrated to sea level for the
+location in which the weather station will be deployed. There is a calibration
+value in the bme280_sensor.py script that that can be used to calibrate the
+barometer. It is simply a value to be added or subtracted from the sensor's
+reading. To determine what value to add or subtract from the reading, look up
+the barometric reading from a local weather reporting agency, such as
+Weather.com or Wunderground.com. You may need to convert the agency's reading
+from inHg to millibars. Then find the difference between the weather agency's
+reading and that which is reported by the sensor and add or subtract that
+difference as needed from the sensor's reading.
+
 ## Running the Weather Station
 
 The `startWeatherStation.sh` script will start a tmux session and call the
