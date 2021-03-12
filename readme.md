@@ -114,8 +114,10 @@ mount point and modify the fstab so an external USB storage device will be
 automatically mounted on boot. It will also configure the Pi to automatically
 connect to a network named `Weather` if present. This can be helpful if you want
 to connect to the Pi wirelessly using a mobile hotspot. The script will also
-configure the Pi to use the Real Time Clock for time. This script must be run
-as root and the Pi must be restarted for the changes to take effect:
+configure the Pi to use the Real Time Clock for time. The script will also
+install and configure Grafana to start up when the pi boots, and it sets up and
+configures an InfluxDB database. This script must be run as root and the Pi must
+be restarted for the changes to take effect:
 
 ``` bash
 sudo ./install.sh

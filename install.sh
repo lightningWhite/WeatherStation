@@ -38,8 +38,33 @@ mkdir -p /home/pi/WeatherStation/data /home/pi/WeatherStation/logs
 chown pi:pi /home/pi/WeatherStation/data /home/pi/WeatherStation/logs
 
 # Enable ssh connections
+echo "Enabling ssh"
 sudo systemctl enable ssh
 sudo systemctl start ssh
+
+# Install and enable Grafana to start at boot
+echo "Installing and enabling Grafana to start on boot..."
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+echo "deb https://packages.grafana.com/oss/deb stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+sudo apt update
+sudo apt install grafana
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
+echo "Grafana is accessible at this machine's IP address and port 3000"
+
+# Install and configure an InfluxDB database
+echo "Installing, enabling, and configuring an InfluxDB database to start on boot..."
+wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+# Note: This command is assuming the Buster version of Raspbian
+echo "deb https://repos.influxdata.com/debian buster stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+sudo apt update
+sudo apt install influxdb
+sudo systemctl unmask influxdb
+sudo systemctl enable influxdb
+sudo systemctl start influxdb
+
+# Create the database and configure it for the weather data
+influx -execute "CREATE DATABASE weather"
 
 echo ""
 echo "The weather station has been installed!"
