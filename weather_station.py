@@ -20,12 +20,18 @@ import time
 import traceback
 import wind_direction
 
+# TODO: Since adding the database stuff, the weather station hasn't been
+# starting correctly on boot. It stops suddenly. Debug and fix this.
+# Could it be that the database isn't starting fast enough or something?
+# Is it something with sudo?
 
 # How often the sensor readings should be logged
 LOG_INTERVAL = 900  # 15 Minutes in seconds
+LOG_INTERVAL = 10  # 15 Minutes in seconds
 
 # How often readings should be taken to form the average that will be logged
 ACCUMULATION_INTERVAL = 10  # 10 seconds
+ACCUMULATION_INTERVAL = 2  # 10 seconds
 
 
 ###############################################################################
