@@ -47,7 +47,7 @@ echo "Installing and enabling Grafana to start on boot..."
 wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
 echo "deb https://packages.grafana.com/oss/deb stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 sudo apt update
-sudo apt install grafana
+sudo apt install grafana -y
 sudo systemctl enable grafana-server
 sudo systemctl start grafana-server
 echo "Grafana is accessible at this machine's IP address and port 3000"
@@ -58,13 +58,16 @@ wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
 # Note: This command is assuming the Buster version of Raspbian
 echo "deb https://repos.influxdata.com/debian buster stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
 sudo apt update
-sudo apt install influxdb
+sudo apt install influxdb -y
 sudo systemctl unmask influxdb
 sudo systemctl enable influxdb
 sudo systemctl start influxdb
 
 # Create the database and configure it for the weather data
 influx -execute "CREATE DATABASE weather"
+
+# Open up the permissions of where the database data is stored so it can be backed up
+sudo chmod -R a+rwx /var/lib/influxdb/data/
 
 echo ""
 echo "The weather station has been installed!"

@@ -1,5 +1,6 @@
 colorzero==1.1
 gpiozero==1.5.1
+influxdb==5.3.1
 pkg-resources==0.0.0
 RPi.bme280==0.2.3
 RPi.GPIO==0.7.0

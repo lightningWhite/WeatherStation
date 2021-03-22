@@ -8,6 +8,7 @@
 from gpiozero import Button
 import bme280_sensor
 import datetime
+from influxdb import InfluxDBClient
 import logger as logging
 import math
 import os
@@ -19,12 +20,28 @@ import time
 import traceback
 import wind_direction
 
+
 # How often the sensor readings should be logged
 LOG_INTERVAL = 900  # 15 Minutes in seconds
 
 # How often readings should be taken to form the average that will be logged
 ACCUMULATION_INTERVAL = 10  # 10 seconds
 
+
+###############################################################################
+# InfluxDB Database Setup
+###############################################################################
+
+# Create the client connection
+host = "localhost"
+port = 8086
+client = InfluxDBClient(host=host, port=port)
+
+# Create the 'weather' database. This will not do anything if the database
+# already exists
+dbname = "weather"
+client.create_database(dbname)
+client.switch_database(dbname)
 
 ###############################################################################
 # Anemometer
@@ -136,13 +153,17 @@ if len(stdout) > 0:
     external_storage_connected = True
     data_file = "/mnt/usb1/" + time_name + ".csv"
     log_file = "/mnt/usb1/" + time_name + ".log"
+
+    # Database location
+    database_src = "/var/lib/influxdb/data/" + dbname
+    database_dest = "/mnt/usb1/"
 # If an external USB storage device isn't connected, write to the repo directory
 else:
     data_file = (
         "/home/pi/WeatherStation" + "/" + "data" + "/" + time_name + ".csv"
     )
     log_file = f"/home/pi/WeatherStation/logs/{time_name}.log"
-
+   
 backup_file = data_file + ".bak"
 
 # Setup the logger
@@ -186,6 +207,11 @@ try:
         )
 
     record_number = 1
+
+    ## Database fields
+    # The name of the "table" (even though it's not) for the database records
+    measurement = "weather"
+    location = "backyard"
 
     ###############################################################################
     # The main program loop
@@ -261,15 +287,54 @@ try:
         )
         stdout, stderr = backup_data.communicate()
 
-        logging.log(f"Writing the data to {data_file}")
-
         # Log the data by appending the values to the data .csv file
+        logging.log(f"Writing the data to {data_file}")
         with open(data_file, "a") as file:
             file.write(
                 f"{record_number},{current_time},{ambient_temp},{pressure},"
                 f"{humidity},{wind_direction_avg},{wind_direction_string},"
                 f"{wind_speed},{wind_gust},{precipitation}\n"
             )
+
+        # Write the data to the database as well for Grafana visualization
+        logging.log(f"Writing to the database")
+        data = [
+        {
+          "measurement": measurement,
+            "tags": {
+                "location": location,
+            },
+            # Use UTC time so it is handled correctly in Grafana
+            # Note that this time will be slightly different than
+            # the time logged in the CSV. Ideally, I would convert the
+            # current_time to utc time.
+            "time": datetime.datetime.utcnow(),
+            "fields": {
+                "Temperature (F)": ambient_temp,
+                "Pressure (mbar)": pressure,
+                "Relative Humidity (%)": humidity,
+                "Wind Direction (Degrees)": wind_direction_avg,
+                "Wind Direction (String)": wind_direction_string,
+                "Avg. Wind Speed (MPH)": wind_speed,
+                "Wind Gust (MPH)": wind_gust,
+                "Precipitation (Inches)": precipitation
+            }
+        }]
+        client.write_points(data)
+
+        # Backup the database
+        # WARNING: This will probably limit this to running as root since the
+        # database is stored in a root owned directory
+        if external_storage_connected:
+            logging.log(f"Backing up the database")
+            backup_db = subprocess.Popen(
+                f"cp -r {database_src} {database_dest}",
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            stdout, stderr = backup_db.communicate()
+
 
         logging.log(f"Removing the temporary backup file {backup_file}")
         remove_temp_backup_file = subprocess.Popen(
