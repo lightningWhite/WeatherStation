@@ -27,11 +27,11 @@ import wind_direction
 
 # How often the sensor readings should be logged
 LOG_INTERVAL = 900  # 15 Minutes in seconds
-LOG_INTERVAL = 10  # 15 Minutes in seconds
+#LOG_INTERVAL = 10  # 15 Minutes in seconds
 
 # How often readings should be taken to form the average that will be logged
 ACCUMULATION_INTERVAL = 10  # 10 seconds
-ACCUMULATION_INTERVAL = 2  # 10 seconds
+#ACCUMULATION_INTERVAL = 2  # 10 seconds
 
 
 ###############################################################################
@@ -43,10 +43,10 @@ host = "localhost"
 port = 8086
 client = InfluxDBClient(host=host, port=port)
 
-# Create the 'weather' database. This will not do anything if the database
-# already exists
+# Connect to the 'weather' database. This must already exist for this to work.
+# Using the create_database() function with it already existing will cause this
+# script to crash.
 dbname = "weather"
-client.create_database(dbname)
 client.switch_database(dbname)
 
 ###############################################################################
