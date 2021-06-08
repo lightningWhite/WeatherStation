@@ -62,6 +62,7 @@ This project is set up to handle the following sensors:
 * [200 x 155 x 80mm Junction Box](https://www.amazon.com/YXQ-200mmx155mmx80mm-Electrical-Waterproof-Dustproof/dp/B01N4HZMSW/ref=sr_1_8?c=ts&dchild=1&keywords=Electrical+Boxes%2C+Conduits+%26+Fittings&qid=1613622299&refinements=p_n_feature_twenty_browse-bin%3A3267888011&s=lamps-light&sr=1-8&ts_id=6369359011)
   * This is to house the Raspberry Pi
 * [ChronoDot 2.1 (DS3231 Chip) Real Time Clock](https://www.adafruit.com/product/255)
+* [Raspberry Pi Camera (Optional)](https://www.amazon.com/gp/product/B07QNSJ32M/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1)
 
 ## Installation and Setup on a Raspberry Pi
 
@@ -70,10 +71,10 @@ This works well with the
 installation. This was all tested with the Buster version of Raspbian on a
 Raspberry Pi 3 Model B+.
 
-In order to use the I2C and SPI interfaces, these have to be enabled. This can
-be done by running `sudo raspi-config` and enabling I2C and SPI in the
-`Interfacing Options`. A reboot is required for these to be fully enabled. This
-can be done by running `sudo reboot`.
+In order to use the I2C and SPI interfaces as well as the camera, these have
+to be enabled. This can be done by running `sudo raspi-config` and enabling
+I2C, SPI and the Camera in the `Interfacing Options`. A reboot is required
+for these to be fully enabled. This can be done by running `sudo reboot`.
 
 The project must be cloned to `/home/pi/` for the scripts to work correctly.
 This can be done by running the following:
@@ -463,6 +464,7 @@ The following files are the primary files used in the weather station:
 * weather_station.py - The main program loop
 * bme280_sensor.py - Temperature, pressure, and humidity sensing
 * wind_direction.py - Wind direction sensing
+* camera.py - The camera module control
 
 The following files are used for setting up and running the weather station:
 
@@ -556,6 +558,15 @@ This file provides logging functionality. A path to the log file location is
 passed to the intialize_logger function and then messages can then be logged
 by calling the log function and passing a message. The message will be logged
 with the current time.
+
+#### camera.py
+
+This file provides a function for taking pictures with the PiCamera.
+The intent of this feature is to be able to associate photos of the sky or
+horizon with current weather records. Later, these photos and data could be
+used for addint prediction capability to the weather station using some
+form of machine learning. The method in this file will save a picture to
+a directory named as the current date and time as a PNG file.
 
 ### Developmental and Utility Files
 

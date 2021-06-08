@@ -33,6 +33,10 @@ LOG_INTERVAL = 900  # 15 Minutes in seconds
 ACCUMULATION_INTERVAL = 10  # 10 seconds
 #ACCUMULATION_INTERVAL = 2  # 10 seconds
 
+# Enable or disable the photos from being taken.
+# If enabled, more disk space will be used.
+PHOTOS_ENABLED = True
+
 
 ###############################################################################
 # InfluxDB Database Setup
@@ -139,6 +143,7 @@ rain_sensor.when_pressed = bucket_tipped
 # The data file will be named by the current date and time
 time_name = datetime.datetime.now().strftime("%m-%d-%Y--%H-%M-%S")
 data_file = ""
+image_directory = ""
 log_file = ""
 backup_file = ""
 external_storage_connected = False
@@ -158,6 +163,7 @@ stdout, stderr = check_external_drive.communicate()
 if len(stdout) > 0:
     external_storage_connected = True
     data_file = "/mnt/usb1/" + time_name + ".csv"
+    image_directory = "/mnt/usb1/weather_images/"
     log_file = "/mnt/usb1/" + time_name + ".log"
 
     # Database location
@@ -168,11 +174,12 @@ else:
     data_file = (
         "/home/pi/WeatherStation" + "/" + "data" + "/" + time_name + ".csv"
     )
+    image_directory = "/home/pi/WeatherStation/data/weather_images/"
     log_file = f"/home/pi/WeatherStation/logs/{time_name}.log"
    
 backup_file = data_file + ".bak"
 
-# Setup the logger
+# Setup the logger. This will create the log_file directory if not already there.
 logging.initialize_logger(log_file)
 
 if not external_storage_connected:
@@ -190,6 +197,7 @@ logging.log(f"The data will be written every {LOG_INTERVAL} seconds")
 logging.log(f"The data file is located here: {data_file}")
 
 try:
+    # Create the data directory if it doesn't already exist
     if not os.path.exists(os.path.dirname(data_file)):
         try:
             os.makedirs(os.path.dirname(data_file))
@@ -197,6 +205,17 @@ try:
             if e.errno != errno.EEXIST:
                 raise
 
+    # Create the image directory if it doesn't already exist
+    # This needs to be created after the data directory since
+    # if the USB drive isn't connected, this directory resides
+    # inside the data directory
+    if not os.path.exists(os.path.dirname(image_directory)):
+        try:
+            os.makedirs(os.path.dirname(image_directory))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+ 
     with open(data_file, "w") as file:
         # Write the labels row
         file.write(
@@ -209,7 +228,8 @@ try:
             "Wind Direction (String),"
             "Wind Speed (MPH),"
             "Wind Gust (MPH),"
-            "Precipitation (Inches)\n"
+            "Precipitation (Inches),"
+            "Image Location\n"
         )
 
     record_number = 1
@@ -260,6 +280,13 @@ try:
             pressure = math.nan
             ambient_temp = math.nan
 
+        # Take a picture of the sky if enabled
+        if PHOTOS_ENABLED:
+            logging.log("Taking a picture")
+            image_location = camera.take_picture(image_directory)
+        else:
+            image_location = math.nan
+
         # This will pull from the Real Time Clock so it can be accurate
         # when there isn't an internet connection. See the readme for
         # instructions on how to configure the Real Time Clock correctly.
@@ -279,6 +306,7 @@ try:
         print(f"Avg. Wind Speed (MPH):    {wind_speed}")
         print(f"Wind Gust (MPH):          {wind_gust}")
         print(f"Precipitation (Inches):   {precipitation}")
+        print(f"Image Location:           {image_location}")
 
         print(
             "##########################################################################"
@@ -299,7 +327,7 @@ try:
             file.write(
                 f"{record_number},{current_time},{ambient_temp},{pressure},"
                 f"{humidity},{wind_direction_avg},{wind_direction_string},"
-                f"{wind_speed},{wind_gust},{precipitation}\n"
+                f"{wind_speed},{wind_gust},{precipitation},{image_location}\n"
             )
 
         # Write the data to the database as well for Grafana visualization
@@ -324,6 +352,7 @@ try:
                 "Avg. Wind Speed (MPH)": wind_speed,
                 "Wind Gust (MPH)": wind_gust,
                 "Precipitation (Inches)": precipitation
+                "Image Location": image_location
             }
         }]
         client.write_points(data)
