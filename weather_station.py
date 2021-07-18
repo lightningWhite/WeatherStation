@@ -7,6 +7,7 @@
 
 from gpiozero import Button
 import bme280_sensor
+import camera
 import datetime
 from influxdb import InfluxDBClient
 import logger as logging
