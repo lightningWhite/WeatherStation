@@ -352,7 +352,7 @@ try:
                 "Wind Direction (String)": wind_direction_string,
                 "Avg. Wind Speed (MPH)": wind_speed,
                 "Wind Gust (MPH)": wind_gust,
-                "Precipitation (Inches)": precipitation
+                "Precipitation (Inches)": precipitation,
                 "Image Location": image_location
             }
         }]
