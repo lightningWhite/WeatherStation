@@ -21,17 +21,14 @@ import time
 import traceback
 import wind_direction
 
-# TODO: Since adding the database stuff, the weather station hasn't been
-# starting correctly on boot. It stops suddenly. Debug and fix this.
-# Could it be that the database isn't starting fast enough or something?
-# Is it something with sudo?
 
 # How often the sensor readings should be logged
 LOG_INTERVAL = 900  # 15 Minutes in seconds
-#LOG_INTERVAL = 10  # 15 Minutes in seconds
+LOG_INTERVAL = 10  # 15 Minutes in seconds
 
 # How often readings should be taken to form the average that will be logged
 ACCUMULATION_INTERVAL = 10  # 10 seconds
+ACCUMULATION_INTERVAL = 5  # 10 seconds
 #ACCUMULATION_INTERVAL = 2  # 10 seconds
 
 # Enable or disable the photos from being taken.
@@ -160,11 +157,13 @@ check_external_drive = subprocess.Popen(
 )
 stdout, stderr = check_external_drive.communicate()
 
+
 # If an external USB storage device is connected, write the data to it
 if len(stdout) > 0:
     external_storage_connected = True
     data_file = "/mnt/usb1/" + time_name + ".csv"
-    image_directory = "/mnt/usb1/weather_images/"
+    # For some reason, python can't create a subdirectory in the mounted device
+    image_directory = "/mnt/usb1" 
     log_file = "/mnt/usb1/" + time_name + ".log"
 
     # Database location
@@ -175,9 +174,14 @@ else:
     data_file = (
         "/home/pi/WeatherStation" + "/" + "data" + "/" + time_name + ".csv"
     )
-    image_directory = "/home/pi/WeatherStation/data/weather_images/"
+    image_directory = "/home/pi/WeatherStation/data/weather_images"
     log_file = f"/home/pi/WeatherStation/logs/{time_name}.log"
-   
+
+# Since the PiCamera module seems to not be able to write directly
+# to the USB device, they will first be written here, and then copied
+# to the drive later.
+temp_image_directory = "/home/pi/WeatherStation/data/weather_images"
+
 backup_file = data_file + ".bak"
 
 # Setup the logger. This will create the log_file directory if not already there.
@@ -214,9 +218,19 @@ try:
         try:
             os.makedirs(os.path.dirname(image_directory))
         except OSError as e:
+            print(str(e))
             if e.errno != errno.EEXIST:
                 raise
- 
+
+    # Make sure the temp_image_directory is created
+    # TODO: This isn't getting created
+    if not os.path.exists(os.path.dirname(temp_image_directory)):
+        try:
+            os.makedirs(os.path.dirname(temp_image_directory))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
     with open(data_file, "w") as file:
         # Write the labels row
         file.write(
@@ -230,7 +244,7 @@ try:
             "Wind Speed (MPH),"
             "Wind Gust (MPH),"
             "Precipitation (Inches),"
-            "Image Location\n"
+            "Image\n"
         )
 
     record_number = 1
@@ -284,9 +298,17 @@ try:
         # Take a picture of the sky if enabled
         if PHOTOS_ENABLED:
             logging.log("Taking a picture")
-            image_location = camera.take_picture(image_directory)
-        else:
-            image_location = math.nan
+            image_name = camera.take_picture(temp_image_directory)
+            logging.log(f"Moving the picture from {temp_image_directory}/{image_name} to {image_directory}")
+            print(f"Moving the picture from {temp_image_directory}/{image_name} to {image_directory}")
+            # TODO: This move operation is not happening. Try printing out the stdout and stderr.
+            mv_temp_image = subprocess.Popen(
+                f"mv {temp_image_directory}/{image_name} {image_directory}",
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            stdout, stderr = mv_temp_image.communicate()
 
         # This will pull from the Real Time Clock so it can be accurate
         # when there isn't an internet connection. See the readme for
@@ -307,7 +329,7 @@ try:
         print(f"Avg. Wind Speed (MPH):    {wind_speed}")
         print(f"Wind Gust (MPH):          {wind_gust}")
         print(f"Precipitation (Inches):   {precipitation}")
-        print(f"Image Location:           {image_location}")
+        print(f"Image:                    {image_name}")
 
         print(
             "##########################################################################"
@@ -328,7 +350,7 @@ try:
             file.write(
                 f"{record_number},{current_time},{ambient_temp},{pressure},"
                 f"{humidity},{wind_direction_avg},{wind_direction_string},"
-                f"{wind_speed},{wind_gust},{precipitation},{image_location}\n"
+                f"{wind_speed},{wind_gust},{precipitation},{image_name}\n"
             )
 
         # Write the data to the database as well for Grafana visualization
@@ -353,7 +375,7 @@ try:
                 "Avg. Wind Speed (MPH)": wind_speed,
                 "Wind Gust (MPH)": wind_gust,
                 "Precipitation (Inches)": precipitation,
-                "Image Location": image_location
+                "Image": image_name
             }
         }]
         client.write_points(data)
