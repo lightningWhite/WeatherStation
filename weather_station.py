@@ -163,7 +163,8 @@ if len(stdout) > 0:
     external_storage_connected = True
     data_file = "/mnt/usb1/" + time_name + ".csv"
     # For some reason, python can't create a subdirectory in the mounted device
-    image_directory = "/mnt/usb1" 
+    # TODO: Find out if this works
+    image_directory = "/mnt/usb1/weather_images" 
     log_file = "/mnt/usb1/" + time_name + ".log"
 
     # Database location
@@ -214,22 +215,15 @@ try:
     # This needs to be created after the data directory since
     # if the USB drive isn't connected, this directory resides
     # inside the data directory
-    if not os.path.exists(os.path.dirname(image_directory)):
-        try:
-            os.makedirs(os.path.dirname(image_directory))
-        except OSError as e:
-            print(str(e))
-            if e.errno != errno.EEXIST:
-                raise
-
-    # Make sure the temp_image_directory is created
-    # TODO: This isn't getting created
-    if not os.path.exists(os.path.dirname(temp_image_directory)):
-        try:
-            os.makedirs(os.path.dirname(temp_image_directory))
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
+    try:
+        # Note that a trailing slash is required for it to create the last
+        # directory specified in the path
+        os.makedirs(os.path.dirname(image_directory + "/"), exist_ok=True)
+    except OSError as e:
+        print(f"ERROR: Could not create {image_directory}")
+        logging.log(f"ERROR: Could not create {image_directory}")
+        print(str(e))
+        raise
 
     with open(data_file, "w") as file:
         # Write the labels row
@@ -297,18 +291,9 @@ try:
 
         # Take a picture of the sky if enabled
         if PHOTOS_ENABLED:
-            logging.log("Taking a picture")
-            image_name = camera.take_picture(temp_image_directory)
-            logging.log(f"Moving the picture from {temp_image_directory}/{image_name} to {image_directory}")
-            print(f"Moving the picture from {temp_image_directory}/{image_name} to {image_directory}")
-            # TODO: This move operation is not happening. Try printing out the stdout and stderr.
-            mv_temp_image = subprocess.Popen(
-                f"mv {temp_image_directory}/{image_name} {image_directory}",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-            )
-            stdout, stderr = mv_temp_image.communicate()
+            image_name = camera.take_picture(f"{image_directory}")
+        else:
+            image_name = math.nan
 
         # This will pull from the Real Time Clock so it can be accurate
         # when there isn't an internet connection. See the readme for
