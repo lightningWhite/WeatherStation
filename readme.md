@@ -291,6 +291,32 @@ Record Number, Time, Temperature (F), Pressure (mbar), Relative Humidity (%), Wi
 This can easily be viewed by opening the .csv file with a spreadsheet
 application such as Microsoft Excel, LibreOffice Calc, or Google Sheets.
 
+Data will also be logged to an InfluxDB database.
+This allows the data to be viewed by Grafana.
+The `install.sh` script creates a database named `weather` to which the
+weather_station.py script logs the readings.
+
+To manually interact with the database, the `influx` command line tool
+can be used. Some examples of using it are below:
+
+```bash
+# Start the influx command line tool from a terminal
+$ influx
+
+# Select the 'weather' database to interact with
+> use weather
+
+# Select all of the data from the 'weather' database/table
+> SELECT * FROM weather
+
+# Delete the contents of the weather database/table
+# USE WITH PRUDENCE! This will delete everything for good!
+> DROP SERIES FROM weather
+
+# Exit the tool
+> Ctlr+d
+```
+
 ## Application Logging
 
 The `weather_station.py` file initializes a logger. Log messages from the
