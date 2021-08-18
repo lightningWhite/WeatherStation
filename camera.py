@@ -31,6 +31,6 @@ def take_picture(destination_directory):
     except Exception as e:
         print(f"Exception from camera.py: {str(e.args)}")
         logging.log(f"Exception from camera.py: {str(e.args)}")
-        image_name = "nan"
+        image_name = "nan" # The influx database fails with math.nan
 
     return image_name

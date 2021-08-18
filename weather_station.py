@@ -14,6 +14,7 @@ import logger as logging
 import math
 import os
 from pathlib import Path
+import shutil
 import statistics
 import subprocess
 import sys
@@ -35,6 +36,9 @@ ACCUMULATION_INTERVAL = 5  # 10 seconds
 # If enabled, more disk space will be used.
 PHOTOS_ENABLED = True
 
+# When the disk has less than this amount of free storage in bytes,
+# images will cease to be captured.
+IMAGE_DISK_USAGE_THRESHOLD = 1000000000 # 1 GB
 
 ###############################################################################
 # InfluxDB Database Setup
@@ -145,6 +149,7 @@ image_directory = ""
 log_file = ""
 backup_file = ""
 external_storage_connected = False
+disk_space_ok = True
 previous_day = datetime.datetime.now()
 previous_month = datetime.datetime.now()
 
@@ -285,15 +290,20 @@ try:
             humidity, pressure, ambient_temp = bme280_sensor.read_all()
         except:
             logging.log("ERROR: Attempting to read from the bme280 sensor failed")
-            humidity = math.nan
-            pressure = math.nan
-            ambient_temp = math.nan
+            humidity = -1000 # The influx database fails with math.nan
+            pressure = -1000
+            ambient_temp = -1000
+
+        if shutil.disk_usage(image_directory).free < IMAGE_DISK_USAGE_THRESHOLD:
+            disk_space_ok = False
+            print(f"Image capturing disabled due to limited remaining disk space: {shutil.disk_usage(image_directory).free} bytes remaining")
+            logging.log(f"Image capturing disabled due to limited remaining disk space: {shutil.disk_usage(image_directory).free} bytes remaining")
 
         # Take a picture of the sky if enabled
-        if PHOTOS_ENABLED:
+        if PHOTOS_ENABLED and disk_space_ok:
             image_name = camera.take_picture(f"{image_directory}")
         else:
-            image_name = math.nan
+            image_name = "nan" # The influx database fails with math.nan
 
         # This will pull from the Real Time Clock so it can be accurate
         # when there isn't an internet connection. See the readme for
