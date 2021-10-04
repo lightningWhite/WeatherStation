@@ -52,7 +52,7 @@ BRIGHTNESS_THRESHOLD = 20
 camera_obj = PiCamera()
 camera_obj.resolution = (1024, 1024)
 camera_obj.brightness = 50
- 
+camera_obj.rotation = 90 
 
 ###############################################################################
 # InfluxDB Database Setup
@@ -448,6 +448,6 @@ try:
         record_number = record_number + 1
 
 except Exception as e:
-    camera.close()
+    camera_obj.close()
     logging.log("An unhandled exception occurred causing a crash: " + str(e.args))
     traceback.print_exc()
