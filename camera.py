@@ -15,7 +15,12 @@ from PIL import ImageStat
 
 import logger as logging
 
-def take_picture(destination_directory):
+# NOTE: The PiCamera 'camera' object has to be passed in from the weather_station.py
+# loop since the object gets used in rapid succession. If it's reinstated for each
+# use, conflicts arise causing it to fail. There may be a better way of handling
+# this though.
+
+def take_picture(camera, destination_directory):
     """
     Takes a picture using the PiCamera and saves it to the
     destination_directory named by the date as a jpeg.
@@ -23,14 +28,11 @@ def take_picture(destination_directory):
     The image name as a string will be return.
     """
     try:
-        # When the camera goes out of scope, camer.close() will automatically be called
-        with PiCamera() as camera:
-            camera.resolution = (1024, 1024)
-            camera.brightness = 50
-            now = datetime.datetime.now()
-            # Note that camera.capture fails with ':' characters in the filename
-            image_name = f"{now.strftime('%Y-%m-%d_%H-%M-%S')}.jpeg"
-            camera.capture(destination_directory + "/" + image_name)
+        # When the camera goes out of scope, camera.close() will automatically be called
+        now = datetime.datetime.now()
+        # Note that camera.capture fails with ':' characters in the filename
+        image_name = f"{now.strftime('%Y-%m-%d_%H-%M-%S')}.jpeg"
+        camera.capture(destination_directory + "/" + image_name)
 
     except Exception as e:
         print(f"Exception from camera.py: {str(e.args)}")
@@ -41,7 +43,7 @@ def take_picture(destination_directory):
 
 
 
-def sufficient_brightness(threshold):
+def sufficient_brightness(camera, threshold):
     """
     Determines if the ambient light is sufficient for taking a
     picture with desired level of discernible features as defined
@@ -50,8 +52,7 @@ def sufficient_brightness(threshold):
     """
     # Capture an in-memory stream
     stream = BytesIO()
-    with PiCamera() as camera:
-        camera.capture(stream, format='jpeg')
+    camera.capture(stream, format='jpeg')
     # Rewind the stream to the beginning to read its content
     stream.seek(0)
     image = Image.open(stream)

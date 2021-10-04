@@ -14,6 +14,7 @@ import logger as logging
 import math
 import os
 from pathlib import Path
+from picamera import PiCamera
 import shutil
 import statistics
 import subprocess
@@ -25,12 +26,12 @@ import wind_direction
 
 # How often the sensor readings should be logged
 LOG_INTERVAL = 900  # 15 Minutes in seconds
-#LOG_INTERVAL = 10  # 15 Minutes in seconds
+LOG_INTERVAL = 10  # 15 Minutes in seconds
 
 # How often readings should be taken to form the average that will be logged
 ACCUMULATION_INTERVAL = 10  # 10 seconds
 #ACCUMULATION_INTERVAL = 5  # 10 seconds
-#ACCUMULATION_INTERVAL = 2  # 10 seconds
+ACCUMULATION_INTERVAL = 2  # 10 seconds
 
 # Enable or disable the photos from being taken.
 # If enabled, more disk space will be used.
@@ -45,6 +46,13 @@ IMAGE_DISK_USAGE_THRESHOLD = 1000000000 # 1 GB
 # during the night.
 # TODO: This value may need further tuning after deployment and further testing
 BRIGHTNESS_THRESHOLD = 20
+
+# Issues occur unless only a single camera object is used for the duration of
+# the program.
+camera = PiCamera()
+camera.resolution = (1024, 1024)
+camera.brightness = 50
+ 
 
 ###############################################################################
 # InfluxDB Database Setup
@@ -307,8 +315,8 @@ try:
 
         # Take a picture of the sky if enabled, if there's enough disk space,
         # and if there is the desired amount of ambient light
-        if PHOTOS_ENABLED and disk_space_ok and sufficient_brightness(BRIGHTNESS_THRESHOLD):
-            image_name = camera.take_picture(f"{image_directory}")
+        if PHOTOS_ENABLED and disk_space_ok and camera.sufficient_brightness(camera, BRIGHTNESS_THRESHOLD):
+            image_name = camera.take_picture(camera, f"{image_directory}")
         else:
             image_name = "nan" # The influx database fails with math.nan
 
@@ -440,5 +448,6 @@ try:
         record_number = record_number + 1
 
 except Exception as e:
+    camera.close()
     logging.log("An unhandled exception occurred causing a crash: " + str(e.args))
     traceback.print_exc()
