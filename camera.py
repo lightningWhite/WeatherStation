@@ -20,7 +20,7 @@ import logger as logging
 # use, conflicts arise causing it to fail. There may be a better way of handling
 # this though.
 
-def take_picture(camera, destination_directory):
+def take_picture(camera_obj, destination_directory):
     """
     Takes a picture using the PiCamera and saves it to the
     destination_directory named by the date as a jpeg.
@@ -32,7 +32,7 @@ def take_picture(camera, destination_directory):
         now = datetime.datetime.now()
         # Note that camera.capture fails with ':' characters in the filename
         image_name = f"{now.strftime('%Y-%m-%d_%H-%M-%S')}.jpeg"
-        camera.capture(destination_directory + "/" + image_name)
+        camera_obj.capture(destination_directory + "/" + image_name)
 
     except Exception as e:
         print(f"Exception from camera.py: {str(e.args)}")
@@ -43,7 +43,7 @@ def take_picture(camera, destination_directory):
 
 
 
-def sufficient_brightness(camera, threshold):
+def sufficient_brightness(camera_obj, threshold):
     """
     Determines if the ambient light is sufficient for taking a
     picture with desired level of discernible features as defined
@@ -52,7 +52,7 @@ def sufficient_brightness(camera, threshold):
     """
     # Capture an in-memory stream
     stream = BytesIO()
-    camera.capture(stream, format='jpeg')
+    camera_obj.capture(stream, format='jpeg')
     # Rewind the stream to the beginning to read its content
     stream.seek(0)
     image = Image.open(stream)

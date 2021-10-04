@@ -49,9 +49,9 @@ BRIGHTNESS_THRESHOLD = 20
 
 # Issues occur unless only a single camera object is used for the duration of
 # the program.
-camera = PiCamera()
-camera.resolution = (1024, 1024)
-camera.brightness = 50
+camera_obj = PiCamera()
+camera_obj.resolution = (1024, 1024)
+camera_obj.brightness = 50
  
 
 ###############################################################################
@@ -315,8 +315,8 @@ try:
 
         # Take a picture of the sky if enabled, if there's enough disk space,
         # and if there is the desired amount of ambient light
-        if PHOTOS_ENABLED and disk_space_ok and camera.sufficient_brightness(camera, BRIGHTNESS_THRESHOLD):
-            image_name = camera.take_picture(camera, f"{image_directory}")
+        if PHOTOS_ENABLED and disk_space_ok and camera.sufficient_brightness(camera_obj, BRIGHTNESS_THRESHOLD):
+            image_name = camera.take_picture(camera_obj, f"{image_directory}")
         else:
             image_name = "nan" # The influx database fails with math.nan
 
