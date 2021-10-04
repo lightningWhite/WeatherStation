@@ -25,11 +25,11 @@ import wind_direction
 
 # How often the sensor readings should be logged
 LOG_INTERVAL = 900  # 15 Minutes in seconds
-LOG_INTERVAL = 10  # 15 Minutes in seconds
+#LOG_INTERVAL = 10  # 15 Minutes in seconds
 
 # How often readings should be taken to form the average that will be logged
 ACCUMULATION_INTERVAL = 10  # 10 seconds
-ACCUMULATION_INTERVAL = 5  # 10 seconds
+#ACCUMULATION_INTERVAL = 5  # 10 seconds
 #ACCUMULATION_INTERVAL = 2  # 10 seconds
 
 # Enable or disable the photos from being taken.
@@ -39,6 +39,12 @@ PHOTOS_ENABLED = True
 # When the disk has less than this amount of free storage in bytes,
 # images will cease to be captured.
 IMAGE_DISK_USAGE_THRESHOLD = 1000000000 # 1 GB
+
+# When an image has an average grayscale brightness less than this value,
+# images will not be saved to the disk. This is so images won't be taken
+# during the night.
+# TODO: This value may need further tuning after deployment and further testing
+BRIGHTNESS_THRESHOLD = 20
 
 ###############################################################################
 # InfluxDB Database Setup
@@ -299,8 +305,9 @@ try:
             print(f"Image capturing disabled due to limited remaining disk space: {shutil.disk_usage(image_directory).free} bytes remaining")
             logging.log(f"Image capturing disabled due to limited remaining disk space: {shutil.disk_usage(image_directory).free} bytes remaining")
 
-        # Take a picture of the sky if enabled
-        if PHOTOS_ENABLED and disk_space_ok:
+        # Take a picture of the sky if enabled, if there's enough disk space,
+        # and if there is the desired amount of ambient light
+        if PHOTOS_ENABLED and disk_space_ok and sufficient_brightness(BRIGHTNESS_THRESHOLD):
             image_name = camera.take_picture(f"{image_directory}")
         else:
             image_name = "nan" # The influx database fails with math.nan

@@ -279,13 +279,11 @@ written to.
 Here is some sample data that was logged by the station:
 
 ```
-Record Number, Time, Temperature (F), Pressure (mbar), Relative Humidity (%), Wind Direction (Degrees), Wind Direction (String), Wind Speed (MPH), Wind Gust (MPH), Precipitation (Inches)
-1, 2020-05-16 16:38:54.100572, 67.8, 1014.3, 23.8, 256.5, WSW, 0.7, 2.5, 0.0
-2, 2020-05-16 16:53:55.786168, 66.2, 1014.3, 24.0, 252.0, WSW, 0.5, 2.1, 0.0
-3, 2020-05-16 17:08:56.629817, 65.8, 1014.1, 23.3, 255.5, WSW, 0.4, 3.1, 0.0
-4, 2020-05-16 17:23:58.887251, 65.1, 1014.2, 24.5, 248.4, WSW, 0.3, 1.5, 0.0
-5, 2020-05-16 17:38:59.409071, 65.1, 1014.2, 23.7, 295.7, WNW, 0.1, 0.9, 0.0
-
+Record Number,Time,Temperature (F),Pressure (mbars),Relative Humidity (%),Wind Direction (Degrees),Wind Direction (String),Wind Speed (MPH),Wind Gust (MPH),Precipitation (Inches),Image
+1,2021-08-29 22:12:15.110902,73.9,1021.7,33.7,270.0,W,0.0,0.0,0.0,2021-08-29_22-12-14.jpeg
+2,2021-08-29 22:27:34.472986,73.6,1021.6,32.4,270.0,W,0.0,0.0,0.0,2021-08-29_22-27-33.jpeg
+3,2021-08-29 22:42:52.915142,73.6,1021.4,31.8,270.0,W,0.0,0.0,0.0,2021-08-29_22-42-52.jpeg
+4,2021-08-29 22:58:14.193411,73.6,1021.4,26.9,270.0,W,0.0,0.0,0.0,2021-08-29_22-58-13.jpeg
 ```
 
 This can easily be viewed by opening the .csv file with a spreadsheet
@@ -316,6 +314,14 @@ $ influx
 # Exit the tool
 > Ctlr+d
 ```
+
+The database gets backed up to the USB drive if connected.
+
+A photo is also taken along with each weather record.
+Some testing has shown that the photos will consume approximately 500 MB per
+month, or about 6 GB per year if the photos are taken 24/7. However, since
+photos stop when it gets too dark, this usage will be much smaller depending
+on how much daylight there is for a given day.
 
 ## Application Logging
 

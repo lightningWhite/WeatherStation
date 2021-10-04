@@ -2,6 +2,7 @@ colorzero==1.1
 gpiozero==1.5.1
 influxdb==5.3.1
 picamera==1.13
+pillow==8.3.2
 pkg-resources==0.0.0
 RPi.bme280==0.2.3
 RPi.GPIO==0.7.0
