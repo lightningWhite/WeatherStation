@@ -26,12 +26,12 @@ import wind_direction
 
 # How often the sensor readings should be logged
 LOG_INTERVAL = 900  # 15 Minutes in seconds
-LOG_INTERVAL = 10  # 15 Minutes in seconds
+#LOG_INTERVAL = 10  # 15 Minutes in seconds
 
 # How often readings should be taken to form the average that will be logged
 ACCUMULATION_INTERVAL = 10  # 10 seconds
 #ACCUMULATION_INTERVAL = 5  # 10 seconds
-ACCUMULATION_INTERVAL = 2  # 10 seconds
+#ACCUMULATION_INTERVAL = 2  # 10 seconds
 
 # Enable or disable the photos from being taken.
 # If enabled, more disk space will be used.
@@ -45,7 +45,7 @@ IMAGE_DISK_USAGE_THRESHOLD = 1000000000 # 1 GB
 # images will not be saved to the disk. This is so images won't be taken
 # during the night.
 # TODO: This value may need further tuning after deployment and further testing
-BRIGHTNESS_THRESHOLD = 20
+BRIGHTNESS_THRESHOLD = 10
 
 # Issues occur unless only a single camera object is used for the duration of
 # the program.
