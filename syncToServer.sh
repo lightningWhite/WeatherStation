@@ -33,3 +33,4 @@ echo Backup server: $BACKUP_SERVER
 echo Remote backup path: $REMOTE_BACKUP_PATH
 rsync -avh $LOCAL_BACKUP_PATH $BACKUP_USER@$BACKUP_SERVER:$REMOTE_BACKUP_PATH
 date
+

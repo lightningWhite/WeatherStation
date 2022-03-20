@@ -726,6 +726,40 @@ follows:
 0.6: 337.5
 ```
 
+#### syncToServer.sh and sync_to_server_cronjob
+
+The `syncToServer.sh` script can be used to upload the data collected
+by the weather station to another backup server if connected to the network.
+This script simply performs an rsync command so only the modified or new
+files get copied to the backup server.
+
+The `syncToServer.sh` script expects a `.env` file to be present. This
+file will be sourced to make the required environment variables be present.
+These environment variables specify the local backup path and the 
+information required to connect to the remote backup server via ssh.
+
+For this to work, an ssh key must be copied to the remote server so
+a password isn't required to copy the files over. This ssh key can be
+generated following the same instructions provied by GitHub for generating
+a key. If you already have a GitHub key, this key can be copied to the
+remote server.
+
+Use this command to do so:
+
+```bash
+ssh-copy-id -i ~/.ssh/key.pub <username>@<IPAddress>
+```
+
+The `sync_to_server_cronjob` file can be copied to `/etc/cron.d/` for the
+`syncToServer.sh` script to be executed automatically at configurable
+intervals.
+
+Please see the `syncToServer.sh` script for additional documentation on
+how to structure the `.env` file for proper operation.
+
+Each time the cronjob is executed, a log output is place at
+/tmp/serverSync.log. This file will be deleted each time the Pi is rebooted.
+
 ### Board Assembly Notes
 
 Referring to the Raspberry Pi Weather Station tutorial mentioned earlier can
