@@ -489,6 +489,36 @@ This should show the IP address of the Raspberry Pi on the hotspot network.
 Any of the previously mentioned methods should now work to connect to the
 Raspberry Pi using the mobile device.
 
+## Configuring a Static IP Address
+
+In order to reliably use Grafana to view the contents of the database, it's
+beneficial to configure a static IP address.
+This can be done by configuring a static IP address through your router.
+Routers are usually accessible by browsing to 192.168.0.1 and logging in with
+the appropriate credentials.
+Once logged in, you can usually navigate to the advanced setup and look for
+something like "LAN Setup".
+In this area, you can add a static IP address so the router always assigns the
+same IP address to the device that has the MAC address you enter in for the Pi.
+
+Alternatively, you can configure the Raspberry Pi to request a certain IP
+address rather than receiving one from the router. To do this, edit the
+`/etc/dhcpcd.conf` file as root as follows:
+
+```
+interface <NETWORK>
+static ip_address=<STATIC_IP>/24
+static routers=<ROUTER_IP>
+static domain_name_servers=<DNS_IP>
+```
+
+For the `<NETWORK>`, enter your network connection: eth0 for ethernet or
+wlan0 for wirelesss. For the `<STATIC_IP>` enter the IP address you want
+your Pi to have. For the `<ROUTER_IP>` enter the IP address for your router
+(typically 192.168.0.1) or the IP address of the WiFi extender you may be using.
+For the `<DNS_IP>` enter the DNS IP address, which is usually the same as your
+router's gateway address (192.168.0.1).
+
 ## Weather Station Files
 
 The following files are the primary files used in the weather station:
