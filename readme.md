@@ -630,6 +630,14 @@ used for addint prediction capability to the weather station using some
 form of machine learning. The method in this file will save a picture to
 a directory named as the current date and time as a PNG file.
 
+You may want to turn off the red camera LED to prevent reflections on the
+glass. This can be done by adding the following line to /boot/config.txt
+and rebooting:
+
+```
+disable_camera_led=1
+```
+
 ### Developmental and Utility Files
 
 The code from most of these files is extracted into the weather_station.py
