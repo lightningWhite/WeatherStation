@@ -764,6 +764,12 @@ follows:
 0.6: 337.5
 ```
 
+#### influxBackup.sh
+
+This script executes the commands to backup the influxdb database.
+It rotates between a previous and a latest backup. This script
+can be invoked within the syncToServer.sh script.
+
 #### syncToServer.sh and sync_to_server_cronjob
 
 The `syncToServer.sh` script can be used to upload the data collected
