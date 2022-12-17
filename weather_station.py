@@ -390,20 +390,6 @@ try:
         }]
         client.write_points(data)
 
-        # Backup the database
-        # WARNING: This will probably limit this to running as root since the
-        # database is stored in a root owned directory
-        if external_storage_connected:
-            logging.log(f"Backing up the database")
-            backup_db = subprocess.Popen(
-                f"cp -r {database_src} {database_dest}",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-            )
-            stdout, stderr = backup_db.communicate()
-
-
         logging.log(f"Removing the temporary backup file {backup_file}")
         remove_temp_backup_file = subprocess.Popen(
             f"rm {backup_file}",

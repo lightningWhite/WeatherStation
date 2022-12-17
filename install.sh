@@ -66,9 +66,6 @@ sudo systemctl start influxdb
 # Create the database and configure it for the weather data
 influx -execute "CREATE DATABASE weather"
 
-# Open up the permissions of where the database data is stored so it can be backed up
-sudo chmod -R a+rwx /var/lib/influxdb/data/
-
 echo ""
 echo "The weather station has been installed!"
 echo "The Raspberry Pi must be restarted for the weather station to start automatically."
