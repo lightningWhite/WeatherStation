@@ -519,6 +519,38 @@ your Pi to have. For the `<ROUTER_IP>` enter the IP address for your router
 For the `<DNS_IP>` enter the DNS IP address, which is usually the same as your
 router's gateway address (192.168.0.1).
 
+## Restoring and Exporting InfluxDB Data
+
+Here are the steps for importing a backed up influxdb database and exporting the contents to a CSV file:
+
+- Start a container to run Influxdb and mount a database backup (podman or docker can be used):
+
+  ```
+  podman run --rm -p 8086:8086 -v /path/to/db/backup:/mnt/weatherData --name influxdb -d docker.io/library/influxdb:1.8
+  ```
+- Exec into the container:
+
+  ```
+  podman exec -ti influxdb /bin/bash
+  ```
+- Import the data from a DB Backup:
+
+  ```
+  influxd restore -portable /mnt/weatherData/
+  ```
+- Export the data to a CSV file. This command will output the timestamps in rfc3339 format and specify the offsets for the timezone:
+
+  ```
+  influx -precision "rfc3339" -database "weather" -execute "SELECT * FROM weather tz('America/Denver')" -format csv > /mnt/weatherData/weather_2022-12-17.csv
+  ```
+- Stop and remove the container:
+
+  ```
+  podman stop influxdb
+  ```
+
+This will place the CSV file in whatever directory you specified as `/path/to/db/backup`.
+
 ## Weather Station Files
 
 The following files are the primary files used in the weather station:
