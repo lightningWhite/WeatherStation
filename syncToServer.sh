@@ -34,7 +34,7 @@ echo Remote backup path: $REMOTE_BACKUP_PATH
 # Export a backup of the influx database
 /home/pi/WeatherStation/influxBackup.sh
 # Sync the files to the remote server, except for the database files
-rsync -avh --exclude $LOCAL_BACKUP_PATH/influxBackupPrev --exclude $LOCAL_BACKUP_PATH/influxBackupLatest $LOCAL_BACKUP_PATH $BACKUP_USER@$BACKUP_SERVER:$REMOTE_BACKUP_PATH
+rsync -avh --exclude 'influxBackupPrev' --exclude 'influxBackupLatest' $LOCAL_BACKUP_PATH $BACKUP_USER@$BACKUP_SERVER:$REMOTE_BACKUP_PATH
 # Sync the latest database backup files, and delete the old database files
 # from the remote
 rsync -avh $LOCAL_BACKUP_PATH/influxBackupLatest $BACKUP_USER@$BACKUP_SERVER:$REMOTE_BACKUP_PATH --delete
