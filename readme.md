@@ -521,6 +521,15 @@ router's gateway address (192.168.0.1).
 
 ## Restoring and Exporting InfluxDB Data
 
+First, to back up the full database, you can do so with a command such as this:
+
+```
+influxd backup -portable ~/20231212WeatherData/
+```
+
+This will export all of the necessary files into this specified directory.
+You can then zip this up or something and save it somewhere.
+
 Here are the steps for importing a backed up influxdb database and exporting the contents to a CSV file:
 
 - Start a container to run Influxdb and mount a database backup (podman or docker can be used):
