@@ -969,9 +969,17 @@ some silicone around the junction box plugs to improve water proofing.
 
 ![Step 9](./images/IMG_20200509_194027.jpg)
 
-## TODOs
+## TODOs and Bugs
 
 * Although the station records the readings every 15 minutes, it is just
 recording them every 15 minutes from when the station was started. This needs
 to be changed so it will record the data every 15 minutes (or what ever the
 configured interval is) from the start of the hour instead. 
+* When 21844 images are written to /mnt/usb1/weather_images, the camera module
+begins reporting that there is no space left on the device.
+However, `df -h .` reports that there is only 13G of 58G used (23%).
+Running `df -h .` at `/` shows 12G of 55G is used (22%).
+`df -i` shows only 9% at `/`, and `% elsewhere. However it does show `-` for
+/mnt/usb1. Images can be written to the home directory just fine. Manually
+making a copy of an image to the usb drive fails, but I can create small files.
+After clearing the files, things seemed to work again. Dig into this.
