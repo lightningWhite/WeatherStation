@@ -388,7 +388,10 @@ try:
                 "Image": image_name
             }
         }]
-        client.write_points(data)
+        try:
+            client.write_points(data)
+        except Exception as e:
+            logging.log("ERROR: Writing to the database failed!: " + str(e.args))
 
         logging.log(f"Removing the temporary backup file {backup_file}")
         remove_temp_backup_file = subprocess.Popen(
